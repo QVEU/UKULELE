@@ -1,5 +1,4 @@
 import re
-import shutil
 import subprocess
 import sys
 
@@ -69,7 +68,8 @@ def test_process_leaves_real_ids_alone(tmp_path):
 
 def test_assigned_id_passes_schema(tmp_path, schema_path):
     path = tmp_path / "ptbp2.yaml"
-    shutil.copy(ROOT / "entries" / "ptbp2-entry.yaml", path)
+    text = (ROOT / "entries" / "ptbp2-entry.yaml").read_text()
+    path.write_text(re.sub(r"(?m)^id:.*$", "id: ku-pending-00000000", text, count=1))
     assert aid.process(str(path)) is True
     assert validate_entry(str(path), str(schema_path))
 
