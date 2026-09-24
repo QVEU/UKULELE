@@ -1,0 +1,7 @@
+pyyaml>=6.0
+jsonschema>=4.0
+sentence-transformers>=2.2
+numpy>=1.24
+faiss-cpu>=1.7
+openai>=1.0        # only if using KU_LLM=openai
+anthropic>=0.39    # only if using KU_LLM=anthropic
