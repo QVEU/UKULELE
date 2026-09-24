@@ -1,0 +1,99 @@
+# id assigned by tooling on merge — leave blank in your PR
+id: ku-molvirology-00000000
+version: "0.1.0"
+
+claim_type: real_null
+evidence_layer: functional          # <-- KEY: this is a functional result, not a binding result.
+                                    #     A binding positive elsewhere would NOT contradict this entry.
+domain: molecular virology / RNA biology
+title: >
+  No effect of PTBP2 or its protease-generated fragments on poliovirus
+  IRES-driven translation in vitro
+
+observation: >
+  A luminescent reporter RNA bearing the poliovirus IRES was translated in
+  vitro in the presence of purified full-length PTBP2 and its predicted
+  cleavage products (the fragments expected after processing by the viral
+  protease). No change in reporter output was observed relative to control
+  with any protein species, across the full concentration range tested. The
+  null held for full-length PTBP2 and for every fragment individually.
+
+conditions: >
+  In vitro translation of a poliovirus-IRES reporter RNA. PTBP2 (full-length
+  and predicted cleaved forms) recombinantly expressed and purified from
+  E. coli, then incubated with the reporter RNA. Readout was luminescence from
+  the reporter. Tested across a concentration series for each protein species.
+  # NOTE: fields the schema can't yet hold well — flagged, not lost:
+  #   - which in vitro translation system (RRL? wheat germ? cell-free extract?)
+  #   - protein concentration range / top concentration
+  #   - whether binding itself was ever confirmed independently of function
+  #   - buffer / Mg2+ / K+ conditions, which strongly affect IRES activity
+
+caveats: >
+  Functional readout only — a binding event that does not alter translation
+  under these conditions would be scored as null here, so this is evidence
+  against a functional modulatory effect, NOT direct evidence that PTBP2 fails
+  to bind the IRES. E. coli-purified protein lacks eukaryotic post-translational
+  modifications and may misfold or lack a required partner/cofactor. The in
+  vitro system may lack host factors present during authentic infection.
+  Predicted cleavage fragments were used; actual protease processing in vivo
+  may differ. The IRES may require the cellular context (localization,
+  competing ITAFs) that a reconstituted system does not reproduce.
+
+alternatives: >
+  Confirm binding directly and orthogonally (EMSA, filter binding, or SPR) to
+  separate "no binding" from "binding without functional effect." Test in a
+  more complete system (cell extract or cells) that supplies host ITAFs.
+  Consider PTBP1 vs PTBP2 paralog specificity. Purify from a eukaryotic system
+  to restore modifications/folding. Confirm fragment identity/integrity matches
+  the authentic protease products. Titrate Mg2+/K+ and reporter RNA amount, to
+  which IRES activity is sensitive.
+
+system:
+  organism: >
+    Human protein (PTBP2) vs poliovirus IRES element — cross-species
+    host–pathogen pair, no single "model organism"
+  model: >
+    Cell-free / reconstituted in vitro translation of an IRES reporter RNA
+  conditions_structured:
+    protein_source: E. coli recombinant
+    protein_species: full-length PTBP2 + predicted protease-cleavage fragments
+    readout: luminescent reporter
+    assay_format: in vitro translation
+
+method:
+  name: in vitro translation of an IRES reporter RNA
+  category: functional-translation-assay
+
+confidence:
+  level: medium
+  positive_control:
+    present: false               # <-- surfaced, not buried. This is the single biggest
+    worked: false                #     limitation of the null and now it's structured.
+    detail: >
+      No known IRES modulator was run in parallel to confirm the assay could
+      detect a functional effect at all. Without this, the null cannot be fully
+      distinguished from an assay insensitive to any modulator. Strongly
+      recommended before treating this as a confident negative.
+  powered: true
+  controls: >
+    Concentration series per protein species (dose–response would reveal an
+    effect if present). Reporter translation occurred, so the translation
+    system itself was functional.
+  n: concentration series per species; replicate count not specified here
+  detection_limit: >
+    Would not detect effects smaller than the assay's luminescence noise floor,
+    nor effects requiring cofactors/context absent in vitro.
+
+related_positive:
+  # Prior literature reports PTB-family involvement in some picornaviral IRES
+  # activity — a real potential tension worth linking once IDs/DOIs are in hand.
+  - "TODO: cite prior PTB/picornavirus IRES literature (DOI)"
+
+contributor:
+  name: "TODO"
+  orcid: "0000-0000-0000-0000"
+  lab: "TODO"
+
+date: "2026-09-24"
+references: []
