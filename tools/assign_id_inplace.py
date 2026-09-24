@@ -36,4 +36,5 @@ def process(path):
 if __name__ == "__main__":
     root = sys.argv[1] if len(sys.argv) > 1 else "entries/"
     files = glob.glob(os.path.join(root, "*.yaml")) + glob.glob(os.path.join(root, "*.yml"))
-    any(process(p) for p in files)
+    for p in files:
+        process(p)

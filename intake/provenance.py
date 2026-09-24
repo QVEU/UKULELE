@@ -50,6 +50,10 @@ class IntakeState:
         self.fields: Dict[str, Field] = {k: Field() for k in ALL_FIELDS}
 
     def set(self, name, value, provenance, source=None):
+        provenance = str(provenance).strip().lower()
+        # An unrecognized label would otherwise bypass the HUMAN_OWNED guard and read as resolved.
+        if provenance not in (STATED, INFERRED, UNKNOWN):
+            return False
         # HUMAN_OWNED fields cannot be set by inference — downgrade to a prompt.
         if name in HUMAN_OWNED and provenance == INFERRED:
             return False

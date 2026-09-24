@@ -36,6 +36,15 @@ def emit(state: IntakeState, out_dir="entries/"):
         "date": _v(state, "date", ""),
         "references": _v(state, "references", []),
     }
+    # The schema types powered as boolean; an unknown is omitted rather than written as null.
+    if entry["confidence"]["powered"] is None:
+        del entry["confidence"]["powered"]
+    cs = _v(state, "conditions_structured")
+    if cs is not None:
+        if isinstance(entry["system"], dict):
+            entry["system"] = {**entry["system"], "conditions_structured": cs}
+        else:
+            entry["conditions_structured"] = cs  # can't nest; keep it visible for validation to flag
     os.makedirs(out_dir, exist_ok=True)
     # Comment header preserves which fields were left unknown, for reviewer context
     unknowns = state.unknowns()

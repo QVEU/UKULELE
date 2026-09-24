@@ -28,7 +28,7 @@ def parse_turn(state: IntakeState, user_text: str):
     except Exception:
         return {}  # if parsing fails, change nothing — never guess
     for name, u in updates.items():
-        if name in state.fields:
+        if name in state.fields and isinstance(u, dict):
             state.set(name, u.get("value"), u.get("provenance", UNKNOWN), u.get("source"))
     return updates
 

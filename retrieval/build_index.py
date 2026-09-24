@@ -60,6 +60,7 @@ def main():
         "claim_type": e["claim_type"],
         "evidence_layer": e["evidence_layer"],
         "domain": e["domain"],
+        "system": e.get("system", {}),
         "confidence": e.get("confidence", {}),
         "conditions": e.get("conditions", ""),
         "caveats": e.get("caveats", ""),
