@@ -66,13 +66,11 @@ def query(text, top_k=5, evidence_layer=None, claim_type=None):
         idx = list(range(len(entries)))
         if evidence_layer: idx = [i for i in idx if entries[i]["evidence_layer"] == evidence_layer]
         if claim_type:     idx = [i for i in idx if entries[i]["claim_type"] == claim_type]
-        if not idx:        idx = []
+        hits = []
         if idx:
             sims = vecs[idx] @ q
             order = np.argsort(-sims)[:top_k]
             hits = [{**entries[idx[o]], "score": float(sims[o])} for o in order]
-        else:
-            hits = []
 
     if not hits:
         return [], {"verdict": "no_match", "detail": "No entries match the requested filters."}

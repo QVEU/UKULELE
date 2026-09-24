@@ -1,0 +1,109 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://knowledge-universe.org/schema/entry.schema.json",
+  "title": "Knowledge Universe Entry",
+  "type": "object",
+  "required": [
+    "id", "version", "claim_type", "evidence_layer", "domain", "title",
+    "observation", "system", "method", "conditions",
+    "confidence", "contributor", "date"
+  ],
+  "properties": {
+    "id":       { "type": "string", "description": "Assigned by tooling on merge. Do not set manually.", "pattern": "^ku-[a-z0-9]*-[0-9a-f]{8}$" },
+    "version":  { "type": "string", "description": "Schema version this entry conforms to.", "const": "0.1.0" },
+
+    "claim_type": {
+      "type": "string",
+      "enum": ["real_null", "not_reproducible", "not_meaningful", "method_failure"],
+      "description": "The evidential category of the negative result. See schema/claim-types.md."
+    },
+
+    "evidence_layer": {
+      "type": "string",
+      "enum": ["binding", "functional", "phenotypic", "computational", "observational"],
+      "description": "The KIND of evidence, orthogonal to claim_type. A functional null and a binding positive are NOT contradictory. Critical for correct clustering/retrieval."
+    },
+
+    "domain":   { "type": "string", "description": "Field / subfield, e.g. 'cell biology', 'catalysis', 'behavioral neuroscience'." },
+    "title":    { "type": "string", "maxLength": 200, "description": "One-line summary of what was tested and not found." },
+
+    "observation": { "type": "string", "description": "FREE TEXT. What was tested and what was (not) observed." },
+    "conditions":  { "type": "string", "description": "FREE TEXT. Parameters/conditions needed to interpret the null." },
+    "caveats":     { "type": "string", "description": "FREE TEXT. Self-assessed reasons the null might be an artifact." },
+    "alternatives":{ "type": "string", "description": "FREE TEXT. Suggested alternative approaches / future directions." },
+
+    "system": {
+      "type": "object",
+      "description": "The experimental system. Fields optional but encouraged for filterability.",
+      "properties": {
+        "organism":   { "type": "string" },
+        "model":      { "type": "string", "description": "Cell line, strain, material, dataset, etc." },
+        "conditions_structured": {
+          "type": "object",
+          "description": "Optional structured conditions to enable comparability checks. Free-text 'conditions' remains the fallback.",
+          "additionalProperties": true,
+          "properties": {
+            "system":     { "type": "string", "description": "e.g. RRL, wheat-germ, HEK293T, 40 field sites" },
+            "key_params": { "type": "object", "additionalProperties": true, "description": "domain-specific: buffer, [Mg2+], dose range, temperature, season..." }
+          }
+        }
+      }
+    },
+
+    "method": {
+      "type": "object",
+      "required": ["name"],
+      "properties": {
+        "name":      { "type": "string", "description": "Assay / method / technique." },
+        "category":  { "type": "string", "description": "Controlled vocab; see schema/vocabularies/methods.md." }
+      }
+    },
+
+    "confidence": {
+      "type": "object",
+      "description": "Makes the null interpretable. THE field most negative-results efforts omit.",
+      "required": ["level", "positive_control"],
+      "properties": {
+        "level": {
+          "type": "string",
+          "enum": ["high", "medium", "low"],
+          "description": "Self-assessed strength of this negative result."
+        },
+        "positive_control": {
+          "type": "object",
+          "description": "Was the assay ever shown to detect a TRUE positive? A null from an assay never validated to detect anything is nearly uninterpretable.",
+          "required": ["present"],
+          "properties": {
+            "present": { "type": "boolean", "description": "Was a positive control / known-effect comparator run?" },
+            "worked":  { "type": "boolean", "description": "Did that positive control produce the expected signal?" },
+            "detail":  { "type": "string", "description": "What the positive control was and its result." }
+          }
+        },
+        "powered": { "type": "boolean", "description": "Was the experiment adequately powered to detect a meaningful effect? (Interventional special case of 'threats to validity addressed'.)" },
+        "controls": { "type": "string", "description": "Controls used that support trusting the null." },
+        "n": { "type": "string", "description": "Replicates / sample size, free-form to accommodate any design." },
+        "detection_limit": { "type": "string", "description": "The threshold below which an effect could not have been seen." }
+      }
+    },
+
+    "related_positive": {
+      "type": "array",
+      "description": "Known positive/contradicting results (DOIs, URLs, entry IDs). Prevents false consensus.",
+      "items": { "type": "string" }
+    },
+
+    "contributor": {
+      "type": "object",
+      "required": ["name"],
+      "properties": {
+        "name":  { "type": "string" },
+        "orcid": { "type": "string", "description": "Strongly encouraged — ties credit to a persistent identifier." },
+        "lab":   { "type": "string" }
+      }
+    },
+
+    "date":       { "type": "string", "format": "date" },
+    "references": { "type": "array", "items": { "type": "string" } }
+  },
+  "additionalProperties": false
+}

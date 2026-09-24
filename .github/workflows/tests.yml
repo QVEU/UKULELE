@@ -1,0 +1,16 @@
+name: Tests
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  pytest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      # sentence-transformers is stubbed in tests/conftest.py, so torch isn't needed here.
+      - run: pip install pyyaml jsonschema numpy faiss-cpu fastapi httpx pydantic pytest
+      - run: pytest

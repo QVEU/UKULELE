@@ -12,7 +12,7 @@ proxy; we say so.
 from itertools import combinations
 
 def _params(e):
-    cs = e.get("conditions_structured", {}) or {}
+    cs = (e.get("system") or {}).get("conditions_structured") or {}
     return cs.get("system"), (cs.get("key_params") or {})
 
 def structural_comparability(a, b):
