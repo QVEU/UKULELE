@@ -1,0 +1,30 @@
+name: Assign IDs
+on:
+  push:
+    branches: [main]
+    paths: ["entries/**"]
+
+permissions:
+  contents: write
+
+jobs:
+  assign:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - run: pip install pyyaml
+      - name: Assign IDs to entries missing a real one
+        run: python tools/assign_id_inplace.py entries/
+      - name: Commit any ID assignments
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            git config user.name  "ku-bot"
+            git config user.email "ku-bot@users.noreply.github.com"
+            git add entries/
+            git commit -m "chore: assign entry IDs [skip ci]"
+            git push
+          else
+            echo "No IDs to assign."
+          fi

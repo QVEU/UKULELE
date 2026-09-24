@@ -1,0 +1,20 @@
+name: Validate entries
+on:
+  pull_request:
+    paths: ["entries/**"]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - run: pip install pyyaml jsonschema
+      - name: Validate changed entries
+        run: |
+          # Validate every entry file so a schema change can't silently break existing data
+          shopt -s nullglob
+          files=(entries/*.yaml entries/*.yml)
+          if [ ${#files[@]} -eq 0 ]; then echo "No entries."; exit 0; fi
+          python tools/validate.py "${files[@]}"
