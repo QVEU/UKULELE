@@ -86,7 +86,7 @@ The first command downloads about 400 MB and takes up about 2 GB on disk, so it 
 pytest
 ```
 
-The last line should say `259 passed` (the number grows as tests are added). The tests need no internet and no API key.
+The last line should say `261 passed` (the number grows as tests are added). The tests need no internet and no API key.
 
 ### 5. Try the web app on your own machine
 

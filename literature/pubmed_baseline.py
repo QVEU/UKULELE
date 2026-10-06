@@ -3,12 +3,12 @@
 Each output line has Pyserini's JsonCollection fields ("id", "contents") plus metadata,
 so the files can be indexed for BM25 directly and reused for dense encoding.
 
-Usage: python literature/pubmed_baseline.py pubmed26n0001.xml.gz [...] --out corpus/pubmed/
+Usage: python literature/pubmed_baseline.py pubmed26n0001.xml.gz [...] --out corpus/pubmed/ [--exclude-preprints]
 """
 import argparse, gzip, json, os, re
 import xml.etree.ElementTree as ET
 
-PREPRINT_UI = "D000076942"  # MeSH publication type "Preprint"; excluded from the SPARK corpus
+PREPRINT_UI = "D000076942"  # MeSH publication type "Preprint"
 _YEAR = re.compile(r"(1[89]|20)\d\d")
 
 def _text(el):
@@ -32,12 +32,10 @@ def _abstract(article):
     return " ".join(parts)
 
 def parse_article(elem):
-    """Turn one <PubmedArticle> element into a record dict, or None if it is a preprint."""
+    """Turn one <PubmedArticle> element into a record dict."""
     citation = elem.find("MedlineCitation")
     article = citation.find("Article")
     pub_types = [{"ui": p.get("UI"), "name": _text(p)} for p in article.findall("PublicationTypeList/PublicationType")]
-    if any(p["ui"] == PREPRINT_UI for p in pub_types):
-        return None
     ids = {i.get("IdType"): _text(i) for i in elem.findall("PubmedData/ArticleIdList/ArticleId")}
     pmcid = ids.get("pmc")
     return {
@@ -47,13 +45,14 @@ def parse_article(elem):
         "journal": _text(article.find("Journal/Title")),
         "year": _year(article),
         "pub_types": pub_types,
+        "preprint": any(p["ui"] == PREPRINT_UI for p in pub_types),
         "mesh": [{"ui": d.get("UI"), "name": _text(d)}
                  for d in citation.findall("MeshHeadingList/MeshHeading/DescriptorName")],
         "doi": ids.get("doi") or None,
         "pmcid": pmcid if pmcid and pmcid.startswith("PMC") else (f"PMC{pmcid}" if pmcid else None),
     }
 
-def iter_records(path, stats=None):
+def iter_records(path, stats=None, exclude_preprints=False):
     """Yield records from one baseline file. `stats` (a dict) collects skip counts if given."""
     stats = {} if stats is None else stats
     opener = gzip.open if path.endswith(".gz") else open
@@ -66,7 +65,7 @@ def iter_records(path, stats=None):
                 continue
             if elem.tag == "PubmedArticle":
                 record = parse_article(elem)
-                if record is None:
+                if exclude_preprints and record["preprint"]:
                     stats["preprints"] = stats.get("preprints", 0) + 1
                 else:
                     yield record
@@ -89,13 +88,15 @@ def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("files", nargs="+")
     ap.add_argument("--out", required=True, help="directory for <name>.jsonl.gz files")
+    ap.add_argument("--exclude-preprints", action="store_true",
+                    help="drop records with publication type Preprint (they are kept and flagged by default)")
     args = ap.parse_args(argv)
     os.makedirs(args.out, exist_ok=True)
     for path in args.files:
         stats, count = {}, 0
         name = os.path.basename(path).split(".xml")[0]
         with gzip.open(os.path.join(args.out, f"{name}.jsonl.gz"), "wt", encoding="utf-8") as out:
-            for record in iter_records(path, stats):
+            for record in iter_records(path, stats, exclude_preprints=args.exclude_preprints):
                 out.write(to_json_line(record) + "\n")
                 count += 1
         print(f"{path}: {count} records, skipped {stats or 'none'}")

@@ -1,4 +1,4 @@
-"""Retrieval metrics for the SPARK development harness."""
+"""Retrieval metrics for benchmarking literature search (e.g. against TREC BioGen topics)."""
 
 def reciprocal_rank(ranked, relevant, cutoff=None):
     """1/rank of the first relevant document in `ranked` (best first), or 0 if none is found."""

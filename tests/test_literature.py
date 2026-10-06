@@ -22,14 +22,23 @@ def records():
     return list(pb.iter_records(str(PUBMED), stats)), stats
 
 
-def test_preprints_and_books_are_skipped(records):
+def test_preprints_are_flagged_and_books_skipped(records):
     recs, stats = records
+    assert [(r["pmid"], r["preprint"]) for r in recs] == [
+        ("90000001", False), ("90000002", True), ("90000004", False)]
+    assert stats == {"PubmedBookArticle": 1}
+
+
+def test_preprints_can_be_excluded():
+    stats = {}
+    recs = list(pb.iter_records(str(PUBMED), stats, exclude_preprints=True))
     assert [r["pmid"] for r in recs] == ["90000001", "90000004"]
     assert stats == {"preprints": 1, "PubmedBookArticle": 1}
 
 
 def test_record_fields(records):
-    first, old = records[0]
+    by_pmid = {r["pmid"]: r for r in records[0]}
+    first, old = by_pmid["90000001"], by_pmid["90000004"]
     assert first["title"] == "Kinase XYZ1 inhibition does not alter replication of a model virus."
     assert first["abstract"] == ("BACKGROUND: XYZ1 was proposed to support viral replication. "
                                  "RESULTS: Inhibiting XYZ1 produced no change in viral titer across three doses.")
@@ -48,17 +57,19 @@ def test_gzipped_input_matches_plain(tmp_path, records):
 
 
 def test_pubmed_passages_use_frozen_ids(records):
-    first, old = records[0]
+    first, _, old = records[0]
     assert [pid for pid, _ in pb.passages(first)] == ["PMID:90000001:ti", "PMID:90000001:ab"]
     assert [pid for pid, _ in pb.passages(old)] == ["PMID:90000004:ti"]
     assert all(PASSAGE_ID.match(pid) for r in records[0] for pid, _ in pb.passages(r))
 
 
-def test_pubmed_cli_writes_pyserini_jsonl(tmp_path):
-    pb.main([str(PUBMED), "--out", str(tmp_path)])
+@pytest.mark.parametrize("flags,ids", [([], ["90000001", "90000002", "90000004"]),
+                                       (["--exclude-preprints"], ["90000001", "90000004"])])
+def test_pubmed_cli_writes_pyserini_jsonl(tmp_path, flags, ids):
+    pb.main([str(PUBMED), "--out", str(tmp_path), *flags])
     with gzip.open(tmp_path / "pubmed_sample.jsonl.gz", "rt") as fh:
         docs = [json.loads(line) for line in fh]
-    assert [d["id"] for d in docs] == ["90000001", "90000004"]
+    assert [d["id"] for d in docs] == ids
     assert docs[0]["contents"].startswith("Kinase XYZ1 inhibition") and "RESULTS:" in docs[0]["contents"]
 
 
@@ -104,18 +115,18 @@ def test_jats_pmcid_from_argument_or_error():
         pmc.parse_jats(xml)
 
 
-def test_load_challenge_pmcids(tmp_path):
-    good = tmp_path / "Challenge_PMCIDs.txt"
+def test_load_pmcid_list(tmp_path):
+    good = tmp_path / "subset.txt"
     good.write_text("PMCID\nPMC1\n2\n\n# comment\npmc3\n")
-    assert pmc.load_challenge_pmcids(good) == {"PMC1", "PMC2", "PMC3"}
+    assert pmc.load_pmcid_list(good) == {"PMC1", "PMC2", "PMC3"}
     bad = tmp_path / "bad.txt"
     bad.write_text("PMC1\nnot-an-id\n")
     with pytest.raises(ValueError, match=":2:"):
-        pmc.load_challenge_pmcids(bad)
+        pmc.load_pmcid_list(bad)
 
 
 @pytest.mark.parametrize("listed,kept", [("PMC9000001\n", 1), ("PMC1\n", 0)])
-def test_pmc_cli_filters_by_challenge_list(tmp_path, listed, kept):
+def test_pmc_cli_filters_by_pmcid_list(tmp_path, listed, kept):
     ids = tmp_path / "ids.txt"
     ids.write_text(listed)
     out = tmp_path / "passages.jsonl.gz"

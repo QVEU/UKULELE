@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://knowledge-universe.org/schema/finding.schema.json",
   "title": "Knowledge Universe Finding",
-  "description": "One result stated in one passage of the literature. Shared by the SPARK engine and UKULELE: entries (entry.schema.json) are a superset, and the $defs below must stay identical in both files (enforced by tests/test_schema.py).",
+  "description": "One result stated in one passage of the literature. Shared by the literature engine and the reviewed database: entries (entry.schema.json) are a superset, and the $defs below must stay identical in both files (enforced by tests/test_schema.py).",
   "type": "object",
   "required": ["statement", "outcome", "claim_type", "evidence_layer", "subjects", "source"],
   "properties": {

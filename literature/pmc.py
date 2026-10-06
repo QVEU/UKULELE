@@ -6,7 +6,7 @@ Passage IDs follow schema/finding.schema.json:
   <PMCID>:s<path>:p<n>  nth paragraph of body section <path> (1-based, nested as 3.2);
                         s0 holds paragraphs that sit directly in <body>
 
-Usage: python literature/pmc.py --pmcids Challenge_PMCIDs.txt --out passages.jsonl.gz FILE.xml [...]
+Usage: python literature/pmc.py [--pmcids subset.txt] --out passages.jsonl.gz FILE.xml [...]
 """
 import argparse, gzip, json, re
 import xml.etree.ElementTree as ET
@@ -19,8 +19,8 @@ def normalize_pmcid(value):
     m = _PMCID.match((value or "").strip())
     return f"PMC{m.group(1)}" if m else None
 
-def load_challenge_pmcids(path):
-    """Read the challenge's PMCID list. A non-ID first line is treated as a header."""
+def load_pmcid_list(path):
+    """Read a list of PMCIDs, one per line (with or without the PMC prefix). A non-ID first line is a header."""
     pmcids = set()
     with open(path) as fh:
         for n, line in enumerate(fh, start=1):
@@ -98,10 +98,10 @@ def parse_jats(xml_bytes, pmcid=None):
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("files", nargs="+", help="local JATS XML files")
-    ap.add_argument("--pmcids", help="Challenge_PMCIDs.txt; files for other articles are skipped")
+    ap.add_argument("--pmcids", help="file listing the PMCIDs to keep; other articles are skipped")
     ap.add_argument("--out", required=True, help="output .jsonl.gz, one article per line")
     args = ap.parse_args(argv)
-    allowed = load_challenge_pmcids(args.pmcids) if args.pmcids else None
+    allowed = load_pmcid_list(args.pmcids) if args.pmcids else None
     kept = skipped = 0
     with gzip.open(args.out, "wt", encoding="utf-8") as out:
         for path in args.files:
@@ -112,7 +112,7 @@ def main(argv=None):
                 continue
             out.write(json.dumps(article, ensure_ascii=False) + "\n")
             kept += 1
-    print(f"wrote {kept} articles to {args.out}; skipped {skipped} not in the challenge list")
+    print(f"wrote {kept} articles to {args.out}; skipped {skipped} not in the PMCID list")
 
 if __name__ == "__main__":
     main()
