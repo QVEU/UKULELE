@@ -39,7 +39,9 @@ def _update(**fields):
 
 
 COMPLETE = dict(
-    claim_type="real_null", evidence_layer="functional", domain="virology",
+    outcome="negative", claim_type="real_null", evidence_layer="functional",
+    subjects=[{"role": "agent", "label": "PTBP2"}, {"role": "target", "label": "poliovirus IRES"}],
+    domain="virology",
     title="No effect", observation="Nothing changed.", conditions="In vitro.",
     caveats="Functional only.", system={"model": "RRL"},
     conditions_structured={"system": "RRL", "key_params": {"Mg2+": "2 mM"}},
