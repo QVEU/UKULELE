@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE PubmedArticleSet PUBLIC "-//NLM//DTD PubMedArticle, 1st January 2025//EN" "https://dtd.nlm.nih.gov/ncbi/pubmed/out/pubmed_250101.dtd">
+<!-- Synthetic records for tests. Titles, abstracts, and IDs are invented. -->
+<PubmedArticleSet>
+  <PubmedArticle>
+    <MedlineCitation Status="MEDLINE" Owner="NLM">
+      <PMID Version="1">90000001</PMID>
+      <Article PubModel="Print-Electronic">
+        <Journal>
+          <JournalIssue CitedMedium="Internet">
+            <PubDate><Year>2021</Year><Month>Mar</Month></PubDate>
+          </JournalIssue>
+          <Title>Journal of Invented Results</Title>
+        </Journal>
+        <ArticleTitle>Kinase <i>XYZ1</i> inhibition does not alter replication of a model virus.</ArticleTitle>
+        <Abstract>
+          <AbstractText Label="BACKGROUND" NlmCategory="BACKGROUND">XYZ1 was proposed to support viral replication.</AbstractText>
+          <AbstractText Label="RESULTS" NlmCategory="RESULTS">Inhibiting XYZ1 produced no change in viral titer across   three doses.</AbstractText>
+          <CopyrightInformation>Not part of the abstract.</CopyrightInformation>
+        </Abstract>
+        <PublicationTypeList>
+          <PublicationType UI="D016428">Journal Article</PublicationType>
+        </PublicationTypeList>
+      </Article>
+      <MeshHeadingList>
+        <MeshHeading><DescriptorName UI="D014779" MajorTopicYN="N">Virus Replication</DescriptorName></MeshHeading>
+        <MeshHeading><DescriptorName UI="D011493" MajorTopicYN="Y">Protein Kinases</DescriptorName></MeshHeading>
+      </MeshHeadingList>
+    </MedlineCitation>
+    <PubmedData>
+      <ArticleIdList>
+        <ArticleId IdType="pubmed">90000001</ArticleId>
+        <ArticleId IdType="doi">10.9999/jir.2021.001</ArticleId>
+        <ArticleId IdType="pmc">PMC9000001</ArticleId>
+      </ArticleIdList>
+      <ReferenceList>
+        <Reference>
+          <Citation>A cited paper.</Citation>
+          <ArticleIdList><ArticleId IdType="doi">10.9999/should.not.be.used</ArticleId></ArticleIdList>
+        </Reference>
+      </ReferenceList>
+    </PubmedData>
+  </PubmedArticle>
+  <PubmedArticle>
+    <MedlineCitation Status="PubMed-not-MEDLINE" Owner="NLM">
+      <PMID Version="1">90000002</PMID>
+      <Article PubModel="Electronic">
+        <Journal>
+          <JournalIssue CitedMedium="Internet"><PubDate><Year>2025</Year></PubDate></JournalIssue>
+          <Title>Invented Preprint Server</Title>
+        </Journal>
+        <ArticleTitle>A preprint that must be excluded.</ArticleTitle>
+        <Abstract><AbstractText>Preprint text.</AbstractText></Abstract>
+        <PublicationTypeList>
+          <PublicationType UI="D000076942">Preprint</PublicationType>
+        </PublicationTypeList>
+      </Article>
+    </MedlineCitation>
+    <PubmedData><ArticleIdList><ArticleId IdType="pubmed">90000002</ArticleId></ArticleIdList></PubmedData>
+  </PubmedArticle>
+  <PubmedBookArticle>
+    <BookDocument><PMID Version="1">90000003</PMID></BookDocument>
+  </PubmedBookArticle>
+  <PubmedArticle>
+    <MedlineCitation Status="MEDLINE" Owner="NLM">
+      <PMID Version="1">90000004</PMID>
+      <Article PubModel="Print">
+        <Journal>
+          <JournalIssue CitedMedium="Print">
+            <PubDate><MedlineDate>1998 Dec-1999 Jan</MedlineDate></PubDate>
+          </JournalIssue>
+          <Title>Old Invented Journal</Title>
+        </Journal>
+        <ArticleTitle>An old record with no abstract.</ArticleTitle>
+        <PublicationTypeList>
+          <PublicationType UI="D016428">Journal Article</PublicationType>
+          <PublicationType UI="D016454">Review</PublicationType>
+        </PublicationTypeList>
+      </Article>
+    </MedlineCitation>
+    <PubmedData><ArticleIdList><ArticleId IdType="pubmed">90000004</ArticleId></ArticleIdList></PubmedData>
+  </PubmedArticle>
+</PubmedArticleSet>
