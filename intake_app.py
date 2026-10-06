@@ -67,8 +67,9 @@ def call_llm(prompt: str) -> str:
 # ----------------------------------------------------------------------------
 # Extraction rules (same discipline as the CLI intake agent)
 # ----------------------------------------------------------------------------
-EXTRACTION_RULES = """You are an intake agent for a database of NEGATIVE and
-inconclusive scientific results. The database's ONLY value is its HONESTY.
+EXTRACTION_RULES = """You are an intake agent for a database of scientific results:
+mostly NEGATIVE and inconclusive ones, plus positive results that put them in
+context. The database's ONLY value is its HONESTY.
 
 Convert what the scientist tells you into structured fields by EXTRACTION ONLY.
 You are rewarded for recording gaps and penalized for filling them.
@@ -79,19 +80,25 @@ You are rewarded for recording gaps and penalized for filling them.
    concentrations).
 3. Classify every field: 'stated' (quote their words), 'inferred' (give reasoning,
    shown for confirmation), or 'unknown'.
-4. Ask about HIGH-VALUE gaps specifically, one or two at a time: evidence layer
+4. Ask about HIGH-VALUE gaps specifically, one or two at a time: outcome (no
+   effect, an effect, or couldn't tell?), evidence layer
    (binding/functional/phenotypic/etc.), positive control (run? worked?),
    replicates/sample size, and interpretation-critical conditions.
 5. NEVER propose the confidence level or write caveats for them — prompt them to
    state these in their own words. That is their judgment, not yours.
-6. Be brief. This is a working scientist pasting notes."""
+6. Be brief. This is a working scientist pasting notes.
+7. Record 'outcome' as "negative" (looked for, not found), "inconclusive" (could
+   not tell) or "positive" (an effect was seen). Record 'subjects' as a list of
+   {"role": "agent"|"target"|"system"|"readout", "label": ...}: what was applied or
+   varied, what it was expected to act on, where it was tested, and what was
+   measured. Use the scientist's own names; never add database identifiers."""
 
-FIELDS = ["claim_type","evidence_layer","domain","title","observation","conditions",
+FIELDS = ["outcome","claim_type","evidence_layer","subjects","domain","title","observation","conditions",
           "conditions_structured","caveats","alternatives","system","method",
           "confidence_level","positive_control","powered","n","detection_limit",
           "controls","related_positive","contributor","date","references"]
 HUMAN_OWNED = {"confidence_level", "caveats"}
-HIGH_VALUE  = ["evidence_layer","positive_control","confidence_level","powered","n",
+HIGH_VALUE  = ["outcome","evidence_layer","positive_control","confidence_level","powered","n",
                "conditions_structured"]
 
 # ----------------------------------------------------------------------------
@@ -162,11 +169,13 @@ def to_entry_yaml(sess: Session) -> str:
         f = sess.fields[name]
         return default if f["provenance"] == "unknown" or f["value"] is None else f["value"]
     entry = {
-        "id": "ku-pending-00000000", "version": "0.1.0",
-        "claim_type": v("claim_type", "real_null"),
+        "id": "ku-pending-00000000", "version": "0.2.0",
+        "outcome": v("outcome", "negative"),
+        "claim_type": v("claim_type", "effect_observed" if v("outcome") == "positive" else "real_null"),
         "evidence_layer": v("evidence_layer"),
+        "subjects": v("subjects", []),
         "domain": v("domain", "unspecified"),
-        "title": v("title", "Untitled negative result"),
+        "title": v("title", "Untitled result"),
         "observation": v("observation", ""), "conditions": v("conditions", ""),
         "caveats": v("caveats", ""), "alternatives": v("alternatives", ""),
         "system": v("system", {}), "method": v("method", {"name": "unspecified"}),

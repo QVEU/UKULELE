@@ -14,7 +14,9 @@ def _stated(**fields):
 
 def _complete_state(**overrides):
     fields = dict(
-        claim_type="real_null", evidence_layer="functional", domain="molecular virology",
+        outcome="negative", claim_type="real_null", evidence_layer="functional",
+        subjects=[{"role": "agent", "label": "PTBP2"}, {"role": "target", "label": "poliovirus IRES"}],
+        domain="molecular virology",
         title="No effect of PTBP2", observation="No change in reporter output.",
         conditions="In vitro translation.", caveats="Functional only.",
         alternatives="Try EMSA.", system={"model": "RRL"},
@@ -33,6 +35,30 @@ def _load(path):
 def test_complete_intake_emits_valid_entry(tmp_path, schema_path):
     path = emit(_complete_state(), out_dir=str(tmp_path))
     assert validate_entry(path, str(schema_path))
+    entry = _load(path)
+    assert entry["version"] == "0.2.0" and entry["outcome"] == "negative"
+    assert entry["subjects"][0] == {"role": "agent", "label": "PTBP2"}
+
+
+def test_positive_outcome_gets_matching_claim_type(tmp_path, schema_path):
+    state = _complete_state(outcome="positive")
+    state.fields["claim_type"].provenance = "unknown"
+    path = emit(state, out_dir=str(tmp_path))
+    assert _load(path)["claim_type"] == "effect_observed"
+    assert validate_entry(path, str(schema_path))
+
+
+def test_stated_outcome_and_claim_type_that_disagree_fail_validation(tmp_path, schema_path):
+    path = emit(_complete_state(outcome="positive", claim_type="real_null"), out_dir=str(tmp_path))
+    assert not validate_entry(path, str(schema_path))
+
+
+def test_unknown_outcome_defaults_to_negative_and_is_listed(tmp_path):
+    state = _complete_state()
+    state.fields["outcome"].provenance = "unknown"
+    text = open(emit(state, out_dir=str(tmp_path))).read()
+    assert yaml.safe_load(text)["outcome"] == "negative"
+    assert "'outcome'" in text.splitlines()[1]
 
 
 def test_conditions_structured_nested_under_system(tmp_path, schema_path):

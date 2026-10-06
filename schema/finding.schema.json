@@ -1,0 +1,95 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://knowledge-universe.org/schema/finding.schema.json",
+  "title": "Knowledge Universe Finding",
+  "description": "One result stated in one passage of the literature. Shared by the SPARK engine and UKULELE: entries (entry.schema.json) are a superset, and the $defs below must stay identical in both files (enforced by tests/test_schema.py).",
+  "type": "object",
+  "required": ["statement", "outcome", "claim_type", "evidence_layer", "subjects", "source"],
+  "properties": {
+    "statement": { "type": "string", "minLength": 1, "description": "The finding in one sentence, in the source's own terms." },
+    "outcome": { "$ref": "#/$defs/outcome" },
+    "claim_type": { "$ref": "#/$defs/claim_type" },
+    "evidence_layer": { "$ref": "#/$defs/evidence_layer" },
+    "effect": { "$ref": "#/$defs/effect" },
+    "subjects": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/subject" } },
+    "conditions_structured": { "$ref": "#/$defs/conditions_structured" },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["pmid", "passage_id", "quote"],
+      "properties": {
+        "pmid": { "type": "string", "pattern": "^[1-9][0-9]*$" },
+        "pmcid": { "type": "string", "pattern": "^PMC[0-9]+$" },
+        "passage_id": { "$ref": "#/$defs/passage_id" },
+        "quote": { "type": "string", "minLength": 1, "description": "Verbatim text from the passage that states the finding. Checked by retrieval/findings.verify_quotes." }
+      }
+    }
+  },
+  "allOf": [{ "$ref": "#/$defs/outcome_matches_claim_type" }],
+  "additionalProperties": false,
+  "$defs": {
+    "outcome": {
+      "type": "string",
+      "enum": ["positive", "negative", "inconclusive"],
+      "description": "positive: an effect or relationship was observed; negative: it was looked for and not found; inconclusive: the experiment could not tell."
+    },
+    "claim_type": {
+      "type": "string",
+      "enum": ["effect_observed", "real_null", "not_reproducible", "not_meaningful", "method_failure"],
+      "description": "effect_observed pairs with a positive outcome; the other four categorize negative and inconclusive results."
+    },
+    "evidence_layer": {
+      "type": "string",
+      "enum": ["binding", "functional", "phenotypic", "computational", "observational"],
+      "description": "The KIND of evidence, orthogonal to claim_type. A functional null and a binding positive are NOT contradictory."
+    },
+    "outcome_matches_claim_type": {
+      "if": { "properties": { "outcome": { "const": "positive" } }, "required": ["outcome"] },
+      "then": { "properties": { "claim_type": { "const": "effect_observed" } } },
+      "else": { "properties": { "claim_type": { "not": { "const": "effect_observed" } } } }
+    },
+    "curie": {
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9_.]*:[^\\s:][^\\s]*$",
+      "description": "Compact identifier PREFIX:local_id. Prefixes follow PubTator3's namespaces: NCBIGene, NCBITaxon, MESH, cellosaurus, dbsnp. Add others only by agreement."
+    },
+    "subject": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["role", "label"],
+      "properties": {
+        "role": {
+          "type": "string",
+          "enum": ["agent", "target", "system", "readout"],
+          "description": "agent: what was applied or varied; target: what it was expected to act on; system: where it was tested; readout: what was measured."
+        },
+        "label": { "type": "string", "minLength": 1, "description": "The entity as named in the source." },
+        "id": { "$ref": "#/$defs/curie" }
+      }
+    },
+    "effect": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["direction"],
+      "properties": {
+        "direction": { "type": "string", "enum": ["increase", "decrease", "binds", "required_for", "associated"] },
+        "magnitude": { "type": "string", "description": "Free text, e.g. '2.3-fold' or 'IC50 40 nM'." },
+        "statistic": { "type": "string", "description": "Free text, e.g. 'p = 0.003, n = 12'." }
+      }
+    },
+    "conditions_structured": {
+      "type": "object",
+      "description": "Optional structured conditions to enable comparability checks. Free-text conditions remain the fallback.",
+      "additionalProperties": true,
+      "properties": {
+        "system": { "type": "string", "description": "e.g. RRL, wheat-germ, HEK293T, 40 field sites" },
+        "key_params": { "type": "object", "additionalProperties": true, "description": "Domain-specific: buffer, [Mg2+], dose range, temperature, season..." }
+      }
+    },
+    "passage_id": {
+      "type": "string",
+      "pattern": "^(PMID:[1-9][0-9]*:(ti|ab)|PMC[0-9]+:(ti|ab:p[1-9][0-9]*|s(0|[1-9][0-9]*(\\.[1-9][0-9]*)*):p[1-9][0-9]*))$",
+      "description": "PubMed: PMID:<pmid>:ti (title) or PMID:<pmid>:ab (whole abstract). PMC: <PMCID>:ti, <PMCID>:ab:p<n> (abstract paragraph), or <PMCID>:s<path>:p<n> (body paragraph n of section path, e.g. s3.2; s0 holds paragraphs before the first section)."
+    }
+  }
+}

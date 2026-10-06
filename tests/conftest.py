@@ -45,7 +45,8 @@ except ImportError:
 
 BASE_ENTRY = {
     "id": "ku-molvirology-00000000",
-    "version": "0.1.0",
+    "version": "0.2.0",
+    "outcome": "negative",
     "claim_type": "real_null",
     "evidence_layer": "functional",
     "domain": "molecular virology",

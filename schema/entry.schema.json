@@ -2,34 +2,33 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://knowledge-universe.org/schema/entry.schema.json",
   "title": "Knowledge Universe Entry",
+  "description": "A reviewed result in the database. The $defs shared with finding.schema.json must stay identical (enforced by tests/test_schema.py).",
   "type": "object",
   "required": [
-    "id", "version", "claim_type", "evidence_layer", "domain", "title",
+    "id", "version", "outcome", "claim_type", "evidence_layer", "domain", "title",
     "observation", "system", "method", "conditions",
     "confidence", "contributor", "date"
   ],
   "properties": {
-    "id":       { "type": "string", "description": "Assigned by tooling on merge. Do not set manually.", "pattern": "^ku-[a-z0-9]*-[0-9a-f]{8}$" },
-    "version":  { "type": "string", "description": "Schema version this entry conforms to.", "const": "0.1.0" },
+    "id":       { "$ref": "#/$defs/entry_id", "description": "Assigned by tooling on merge. Do not set manually." },
+    "version":  { "type": "string", "description": "Schema version this entry conforms to.", "const": "0.2.0" },
 
-    "claim_type": {
-      "type": "string",
-      "enum": ["real_null", "not_reproducible", "not_meaningful", "method_failure"],
-      "description": "The evidential category of the negative result. See schema/claim-types.md."
-    },
-
-    "evidence_layer": {
-      "type": "string",
-      "enum": ["binding", "functional", "phenotypic", "computational", "observational"],
-      "description": "The KIND of evidence, orthogonal to claim_type. A functional null and a binding positive are NOT contradictory. Critical for correct clustering/retrieval."
+    "outcome": { "$ref": "#/$defs/outcome" },
+    "claim_type": { "$ref": "#/$defs/claim_type" },
+    "evidence_layer": { "$ref": "#/$defs/evidence_layer" },
+    "effect": { "$ref": "#/$defs/effect" },
+    "subjects": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/subject" },
+      "description": "What was tested on what. The join key for paradox detection; ids are filled by tools/normalize_entities.py during review."
     },
 
     "domain":   { "type": "string", "description": "Field / subfield, e.g. 'cell biology', 'catalysis', 'behavioral neuroscience'." },
-    "title":    { "type": "string", "maxLength": 200, "description": "One-line summary of what was tested and not found." },
+    "title":    { "type": "string", "maxLength": 200, "description": "One-line summary of what was tested and found (or not found)." },
 
     "observation": { "type": "string", "description": "FREE TEXT. What was tested and what was (not) observed." },
-    "conditions":  { "type": "string", "description": "FREE TEXT. Parameters/conditions needed to interpret the null." },
-    "caveats":     { "type": "string", "description": "FREE TEXT. Self-assessed reasons the null might be an artifact." },
+    "conditions":  { "type": "string", "description": "FREE TEXT. Parameters/conditions needed to interpret the result." },
+    "caveats":     { "type": "string", "description": "FREE TEXT. Self-assessed reasons the result might be an artifact." },
     "alternatives":{ "type": "string", "description": "FREE TEXT. Suggested alternative approaches / future directions." },
 
     "system": {
@@ -38,15 +37,7 @@
       "properties": {
         "organism":   { "type": "string" },
         "model":      { "type": "string", "description": "Cell line, strain, material, dataset, etc." },
-        "conditions_structured": {
-          "type": "object",
-          "description": "Optional structured conditions to enable comparability checks. Free-text 'conditions' remains the fallback.",
-          "additionalProperties": true,
-          "properties": {
-            "system":     { "type": "string", "description": "e.g. RRL, wheat-germ, HEK293T, 40 field sites" },
-            "key_params": { "type": "object", "additionalProperties": true, "description": "domain-specific: buffer, [Mg2+], dose range, temperature, season..." }
-          }
-        }
+        "conditions_structured": { "$ref": "#/$defs/conditions_structured" }
       }
     },
 
@@ -61,13 +52,13 @@
 
     "confidence": {
       "type": "object",
-      "description": "Makes the null interpretable. THE field most negative-results efforts omit.",
+      "description": "Makes the result interpretable. THE field most negative-results efforts omit.",
       "required": ["level", "positive_control"],
       "properties": {
         "level": {
           "type": "string",
           "enum": ["high", "medium", "low"],
-          "description": "Self-assessed strength of this negative result."
+          "description": "Self-assessed strength of this result."
         },
         "positive_control": {
           "type": "object",
@@ -80,15 +71,42 @@
           }
         },
         "powered": { "type": "boolean", "description": "Was the experiment adequately powered to detect a meaningful effect? (Interventional special case of 'threats to validity addressed'.)" },
-        "controls": { "type": "string", "description": "Controls used that support trusting the null." },
+        "controls": { "type": "string", "description": "Controls used that support trusting the result." },
         "n": { "type": "string", "description": "Replicates / sample size, free-form to accommodate any design." },
         "detection_limit": { "type": "string", "description": "The threshold below which an effect could not have been seen." }
       }
     },
 
+    "links": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/link" },
+      "description": "Typed edges to other entries or papers. Lineage relations (tests, motivated_by, revises) must form a DAG; tools/validate.py checks this across the database."
+    },
+
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind"],
+      "description": "Where the result comes from. Omitted means contributed directly by a scientist.",
+      "properties": {
+        "kind":       { "type": "string", "enum": ["contributed", "literature"] },
+        "pmid":       { "type": "string", "pattern": "^[1-9][0-9]*$" },
+        "pmcid":      { "type": "string", "pattern": "^PMC[0-9]+$" },
+        "doi":        { "type": "string", "pattern": "^10\\.\\S+$" },
+        "passage_id": { "$ref": "#/$defs/passage_id" },
+        "quotes":     { "type": "array", "items": { "type": "string", "minLength": 1 } }
+      },
+      "if": { "properties": { "kind": { "const": "literature" } } },
+      "then": {
+        "required": ["quotes"],
+        "properties": { "quotes": { "minItems": 1 } },
+        "anyOf": [{ "required": ["pmid"] }, { "required": ["doi"] }]
+      }
+    },
+
     "related_positive": {
       "type": "array",
-      "description": "Known positive/contradicting results (DOIs, URLs, entry IDs). Prevents false consensus.",
+      "description": "Known positive/contradicting results as free-form citations. Prefer links with relation 'contradicts' when the target has a PMID, DOI, or entry ID.",
       "items": { "type": "string" }
     },
 
@@ -105,5 +123,91 @@
     "date":       { "type": "string", "format": "date" },
     "references": { "type": "array", "items": { "type": "string" } }
   },
-  "additionalProperties": false
+  "allOf": [{ "$ref": "#/$defs/outcome_matches_claim_type" }],
+  "additionalProperties": false,
+  "$defs": {
+    "entry_id": { "type": "string", "pattern": "^ku-[a-z0-9]*-[0-9a-f]{8}$" },
+    "link": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["relation", "target"],
+      "properties": {
+        "relation": {
+          "type": "string",
+          "enum": ["tests", "motivated_by", "revises", "supports", "challenges", "replicates", "contradicts"],
+          "description": "Lineage (form a DAG): tests, motivated_by, revises. Evidence (may run both ways): supports, challenges, replicates, contradicts."
+        },
+        "target": {
+          "type": "string",
+          "pattern": "^(ku-[a-z0-9]*-[0-9a-f]{8}|PMID:[1-9][0-9]*|PMC[0-9]+|DOI:10\\.\\S+)$",
+          "description": "An entry ID, PMID:<n>, PMC<n>, or DOI:10.<...>."
+        },
+        "note": { "type": "string" }
+      }
+    },
+
+    "outcome": {
+      "type": "string",
+      "enum": ["positive", "negative", "inconclusive"],
+      "description": "positive: an effect or relationship was observed; negative: it was looked for and not found; inconclusive: the experiment could not tell."
+    },
+    "claim_type": {
+      "type": "string",
+      "enum": ["effect_observed", "real_null", "not_reproducible", "not_meaningful", "method_failure"],
+      "description": "effect_observed pairs with a positive outcome; the other four categorize negative and inconclusive results."
+    },
+    "evidence_layer": {
+      "type": "string",
+      "enum": ["binding", "functional", "phenotypic", "computational", "observational"],
+      "description": "The KIND of evidence, orthogonal to claim_type. A functional null and a binding positive are NOT contradictory."
+    },
+    "outcome_matches_claim_type": {
+      "if": { "properties": { "outcome": { "const": "positive" } }, "required": ["outcome"] },
+      "then": { "properties": { "claim_type": { "const": "effect_observed" } } },
+      "else": { "properties": { "claim_type": { "not": { "const": "effect_observed" } } } }
+    },
+    "curie": {
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9_.]*:[^\\s:][^\\s]*$",
+      "description": "Compact identifier PREFIX:local_id. Prefixes follow PubTator3's namespaces: NCBIGene, NCBITaxon, MESH, cellosaurus, dbsnp. Add others only by agreement."
+    },
+    "subject": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["role", "label"],
+      "properties": {
+        "role": {
+          "type": "string",
+          "enum": ["agent", "target", "system", "readout"],
+          "description": "agent: what was applied or varied; target: what it was expected to act on; system: where it was tested; readout: what was measured."
+        },
+        "label": { "type": "string", "minLength": 1, "description": "The entity as named in the source." },
+        "id": { "$ref": "#/$defs/curie" }
+      }
+    },
+    "effect": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["direction"],
+      "properties": {
+        "direction": { "type": "string", "enum": ["increase", "decrease", "binds", "required_for", "associated"] },
+        "magnitude": { "type": "string", "description": "Free text, e.g. '2.3-fold' or 'IC50 40 nM'." },
+        "statistic": { "type": "string", "description": "Free text, e.g. 'p = 0.003, n = 12'." }
+      }
+    },
+    "conditions_structured": {
+      "type": "object",
+      "description": "Optional structured conditions to enable comparability checks. Free-text conditions remain the fallback.",
+      "additionalProperties": true,
+      "properties": {
+        "system": { "type": "string", "description": "e.g. RRL, wheat-germ, HEK293T, 40 field sites" },
+        "key_params": { "type": "object", "additionalProperties": true, "description": "Domain-specific: buffer, [Mg2+], dose range, temperature, season..." }
+      }
+    },
+    "passage_id": {
+      "type": "string",
+      "pattern": "^(PMID:[1-9][0-9]*:(ti|ab)|PMC[0-9]+:(ti|ab:p[1-9][0-9]*|s(0|[1-9][0-9]*(\\.[1-9][0-9]*)*):p[1-9][0-9]*))$",
+      "description": "PubMed: PMID:<pmid>:ti (title) or PMID:<pmid>:ab (whole abstract). PMC: <PMCID>:ti, <PMCID>:ab:p<n> (abstract paragraph), or <PMCID>:s<path>:p<n> (body paragraph n of section path, e.g. s3.2; s0 holds paragraphs before the first section)."
+    }
+  }
 }
