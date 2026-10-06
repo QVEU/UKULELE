@@ -12,7 +12,7 @@ import yaml
 ROOT = Path(__file__).resolve().parent.parent
 
 # The project modules use flat imports relative to their own directories.
-for sub in ("", "intake", "retrieval", "tools"):
+for sub in ("", "intake", "retrieval", "tools", "literature", "spark/eval"):
     sys.path.insert(0, str(ROOT / sub))
 
 
