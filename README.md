@@ -86,7 +86,7 @@ The first command downloads about 400 MB and takes up about 2 GB on disk, so it 
 pytest
 ```
 
-The last line should say `151 passed` (the number grows as tests are added). The tests need no internet and no API key.
+The last line should say `259 passed` (the number grows as tests are added). The tests need no internet and no API key.
 
 ### 5. Try the web app on your own machine
 
@@ -198,7 +198,13 @@ Submissions are drafts. They become permanent database entries only after you re
    git checkout -b add-new-entries
    ```
 
-3. **Review it.** The comment at the top lists the fields the scientist left unknown. Check with them about anything that looks wrong. `evidence_layer` must be filled in with one of `binding`, `functional`, `phenotypic`, `computational`, or `observational`. Leave `id: ku-pending-00000000` exactly as it is.
+3. **Review it.** The comment at the top lists the fields the scientist left unknown. Check with them about anything that looks wrong. Check these fields in particular:
+   - `outcome` must be `negative`, `inconclusive`, or `positive`. A positive result uses `claim_type: effect_observed`.
+   - `evidence_layer` must be filled in with one of `binding`, `functional`, `phenotypic`, `computational`, or `observational`.
+   - `subjects` lists what was tested on what, each with a `role` (`agent`, `target`, `system` or `readout`) and a `label`. An `agent` and a `target` are what let the entry be matched against conflicting results.
+   - `links` (optional) connects the entry to others. Use `tests`, `motivated_by` or `revises` for lineage, which can never loop back on itself. Use `supports`, `challenges`, `replicates` or `contradicts` for evidence. A target is a merged entry ID, `PMID:<number>`, `PMC<number>`, or `DOI:<doi>`.
+
+   Leave `id: ku-pending-00000000` exactly as it is.
 4. **Check it against the schema:**
 
    ```bash
@@ -325,6 +331,8 @@ All settings are environment variables.
 | `conda: command not found` | Close and reopen Terminal after installing Miniforge. On Windows, use **Miniforge Prompt**. |
 | `validate.py` says a date `is not of type 'string'` | Put quotes around the date, e.g. `date: "2026-09-24"`. |
 | `validate.py` says `None is not of type 'string'` at `evidence_layer` | Fill in the kind of evidence (see Part 3, step 3). |
+| `validate.py` says `INVALID LINKS: ...` | A link points to an entry that doesn't exist yet, to a `ku-pending-00000000` placeholder, or to the entry itself. Or the `tests`/`motivated_by`/`revises` links loop back on themselves. Link only to merged entry IDs, and break the loop. |
+| `validate.py` rejects `outcome` or `claim_type` | They contradict each other: `positive` must use `claim_type: effect_observed`, and `negative`/`inconclusive` must use one of the other four. |
 | Can't download the model / `couldn't connect to 'https://huggingface.co'` | Your network blocks Hugging Face. See the offline instructions in Part 4. |
 | `python intake/agent.py` never records anything | The command-line intake needs a real model. Set `KU_LLM=anthropic` (or `openai`), not `echo`. |
 

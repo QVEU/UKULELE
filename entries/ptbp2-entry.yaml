@@ -6,7 +6,7 @@ outcome: negative
 claim_type: real_null
 evidence_layer: functional          # <-- KEY: this is a functional result, not a binding result.
                                     #     A binding positive elsewhere would NOT contradict this entry.
-subjects:                           # ids are filled during review by tools/normalize_entities.py
+subjects:                           # optional `id` (e.g. NCBIGene:<n>) can be added per subject during review
   - role: agent
     label: PTBP2
   - role: agent

@@ -50,12 +50,14 @@ def test_valid_findings():
                                     effect={"direction": "increase", "magnitude": "2-fold"})) == []
     assert _finding_errors(_finding(source={"pmid": "1", "pmcid": "PMC9", "passage_id": "PMC9:s3.2:p4",
                                             "quote": "x"})) == []
+    assert _finding_errors(_finding(source={"pmcid": "PMC9", "passage_id": "PMC9:ab:p1", "quote": "x"})) == []
 
 
 @pytest.mark.parametrize("overrides", [
     {"source": {"pmid": "12345", "passage_id": "PMID:12345:ab"}},
     {"source": {"pmid": "12345", "passage_id": "abstract", "quote": "q"}},
     {"source": {"pmid": "PMID12345", "passage_id": "PMID:12345:ab", "quote": "q"}},
+    {"source": {"passage_id": "PMC9:ab:p1", "quote": "q"}},
     {"subjects": []},
     {"outcome": "positive"},
     {"claim_type": "effect_observed"},

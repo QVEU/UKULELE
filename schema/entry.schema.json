@@ -20,7 +20,7 @@
     "subjects": {
       "type": "array",
       "items": { "$ref": "#/$defs/subject" },
-      "description": "What was tested on what. The join key for paradox detection; ids are filled by tools/normalize_entities.py during review."
+      "description": "What was tested on what. The join key for paradox detection; optional ids are added during review."
     },
 
     "domain":   { "type": "string", "description": "Field / subfield, e.g. 'cell biology', 'catalysis', 'behavioral neuroscience'." },

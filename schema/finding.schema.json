@@ -16,7 +16,8 @@
     "source": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["pmid", "passage_id", "quote"],
+      "required": ["passage_id", "quote"],
+      "anyOf": [{ "required": ["pmid"] }, { "required": ["pmcid"] }],
       "properties": {
         "pmid": { "type": "string", "pattern": "^[1-9][0-9]*$" },
         "pmcid": { "type": "string", "pattern": "^PMC[0-9]+$" },
