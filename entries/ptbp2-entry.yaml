@@ -1,10 +1,22 @@
 # id assigned by tooling on merge — leave blank in your PR
 id: ku-molecularvir-95a03d44
-version: "0.1.0"
+version: "0.2.0"
 
+outcome: negative
 claim_type: real_null
 evidence_layer: functional          # <-- KEY: this is a functional result, not a binding result.
                                     #     A binding positive elsewhere would NOT contradict this entry.
+subjects:                           # optional `id` (e.g. NCBIGene:<n>) can be added per subject during review
+  - role: agent
+    label: PTBP2
+  - role: agent
+    label: PTBP2 predicted protease-cleavage fragments
+  - role: target
+    label: poliovirus IRES
+  - role: system
+    label: in vitro translation of an IRES reporter RNA
+  - role: readout
+    label: luminescent reporter output
 domain: molecular virology / RNA biology
 title: >
   No effect of PTBP2 or its protease-generated fragments on poliovirus

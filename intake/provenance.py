@@ -25,6 +25,7 @@ class Field:
 # HIGH_VALUE gaps are the ones that change a null's trustworthiness — the agent
 # asks about these specifically rather than interrogating everything equally.
 HIGH_VALUE = [
+    "outcome",                 # negative / inconclusive / positive — what kind of result this is
     "evidence_layer",          # binding vs functional vs phenotypic — changes the meaning
     "positive_control",        # was assay sensitivity ever proven?
     "confidence_level",        # human should OWN this, not rubber-stamp
@@ -37,7 +38,7 @@ HIGH_VALUE = [
 HUMAN_OWNED = ["confidence_level", "caveats"]
 
 ALL_FIELDS = [
-    "claim_type", "evidence_layer", "domain", "title",
+    "outcome", "claim_type", "evidence_layer", "subjects", "domain", "title",
     "observation", "conditions", "conditions_structured", "caveats",
     "alternatives", "system", "method",
     "confidence_level", "positive_control", "powered", "n",

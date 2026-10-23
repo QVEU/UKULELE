@@ -11,6 +11,8 @@ proxy; we say so.
 """
 from itertools import combinations
 
+UNKNOWN_REASON = "no structured conditions to compare — comparability UNKNOWN"
+
 def _params(e):
     cs = (e.get("system") or {}).get("conditions_structured") or {}
     return cs.get("system"), (cs.get("key_params") or {})
@@ -34,7 +36,7 @@ def structural_comparability(a, b):
             reasons.append(f"different systems ({sys_a} vs {sys_b}) — may not corroborate")
 
     shared = set(par_a) & set(par_b)
-    for k in shared:
+    for k in sorted(shared):
         checks += 1
         if str(par_a[k]).strip().lower() == str(par_b[k]).strip().lower():
             score += 1; reasons.append(f"matching {k}")
@@ -42,7 +44,7 @@ def structural_comparability(a, b):
             reasons.append(f"differing {k} ({par_a[k]} vs {par_b[k]})")
 
     if checks == 0:
-        return 0.0, ["no structured conditions to compare — comparability UNKNOWN"]
+        return 0.0, [UNKNOWN_REASON]
     return score / checks, reasons
 
 def semantic_comparability(a, b, call_llm):

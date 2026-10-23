@@ -9,13 +9,16 @@ def _v(state, name, default=None):
     return f.value
 
 def emit(state: IntakeState, out_dir="entries/"):
+    outcome = _v(state, "outcome", "negative")
     entry = {
         "id": "ku-pending-00000000",   # real ID assigned by CI on merge
-        "version": "0.1.0",
-        "claim_type": _v(state, "claim_type", "real_null"),
+        "version": "0.2.0",
+        "outcome": outcome,
+        "claim_type": _v(state, "claim_type", "effect_observed" if outcome == "positive" else "real_null"),
         "evidence_layer": _v(state, "evidence_layer"),   # required — CI will reject if left None
+        "subjects": _v(state, "subjects", []),
         "domain": _v(state, "domain", "unspecified"),
-        "title": _v(state, "title", "Untitled negative result"),
+        "title": _v(state, "title", "Untitled result"),
         "observation": _v(state, "observation", ""),
         "conditions": _v(state, "conditions", ""),
         "caveats": _v(state, "caveats", ""),

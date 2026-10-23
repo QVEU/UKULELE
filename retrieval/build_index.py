@@ -15,9 +15,12 @@ MODEL_NAME = "all-MiniLM-L6-v2"  # small, offline-friendly; swap freely
 INDEX_DIR = os.path.join(os.path.dirname(__file__), "index")
 
 def compose_embedding_text(e: dict) -> str:
+    subjects = "; ".join(f"{s['role']} {s['label']}" for s in e.get("subjects") or [])
     parts = [
+        f"OUTCOME: {e['outcome']}",
         f"CLAIM TYPE: {e['claim_type']}",
         f"EVIDENCE LAYER: {e['evidence_layer']}",
+        f"SUBJECTS: {subjects}" if subjects else "",
         f"DOMAIN: {e['domain']}",
         f"METHOD: {e.get('method', {}).get('name', 'unspecified')}",
         f"CONFIDENCE: {e.get('confidence', {}).get('level', 'unspecified')}",
@@ -57,7 +60,9 @@ def main():
     meta = [{
         "id": e["id"],
         "title": e["title"],
+        "outcome": e["outcome"],
         "claim_type": e["claim_type"],
+        "subjects": e.get("subjects", []),
         "evidence_layer": e["evidence_layer"],
         "domain": e["domain"],
         "system": e.get("system", {}),

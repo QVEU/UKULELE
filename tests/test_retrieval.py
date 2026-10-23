@@ -74,7 +74,7 @@ def test_build_index_with_no_entries(build, capsys):
 
 def test_embedding_text_leads_with_structure(corpus):
     text = build_index.compose_embedding_text(corpus[0])
-    assert text.startswith("CLAIM TYPE: real_null\nEVIDENCE LAYER: functional")
+    assert text.startswith("OUTCOME: negative\nCLAIM TYPE: real_null\nEVIDENCE LAYER: functional")
 
 
 @pytest.mark.parametrize("use_faiss", [True, False])

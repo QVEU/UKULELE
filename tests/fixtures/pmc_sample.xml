@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE article PUBLIC "-//NLM//DTD JATS (Z39.96) Journal Archiving and Interchange DTD v1.3 20210610//EN" "JATS-archivearticle1-3.dtd">
+<!-- Synthetic article for tests. Text and IDs are invented. -->
+<article xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:mml="http://www.w3.org/1998/Math/MathML" article-type="research-article">
+  <front>
+    <journal-meta><journal-title-group><journal-title>Journal of Invented Results</journal-title></journal-title-group></journal-meta>
+    <article-meta>
+      <article-id pub-id-type="pmid">90000001</article-id>
+      <article-id pub-id-type="pmc">9000001</article-id>
+      <article-id pub-id-type="doi">10.9999/jir.2021.001</article-id>
+      <title-group><article-title>Kinase <italic>XYZ1</italic> inhibition does not alter replication</article-title></title-group>
+      <abstract>
+        <sec><title>Background</title><p>XYZ1 was proposed to support replication.</p></sec>
+        <sec><title>Results</title><p>Inhibiting XYZ1 produced no change in titer.</p></sec>
+      </abstract>
+      <abstract abstract-type="graphical"><p>Graphical abstract text that must be skipped.</p></abstract>
+    </article-meta>
+  </front>
+  <body>
+    <p>A paragraph directly in the body.</p>
+    <sec id="s1">
+      <title>Introduction</title>
+      <p>Prior work suggested a role for XYZ1 <xref ref-type="bibr" rid="R1">[1]</xref>.</p>
+      <p>   </p>
+      <p>We tested that suggestion directly.</p>
+    </sec>
+    <sec id="s2">
+      <title>Results</title>
+      <sec id="s2-1">
+        <title>Titer</title>
+        <p>Viral titer did not differ between treated and control cells (p = 0.61).</p>
+        <list list-type="bullet">
+          <list-item><p>No dose produced a change.</p></list-item>
+        </list>
+        <fig id="f1"><caption><p>Figure caption that is not a body paragraph.</p></caption></fig>
+      </sec>
+      <sec id="s2-2">
+        <title>Positive control</title>
+        <p>A known inhibitor reduced titer 40-fold, confirming assay sensitivity.</p>
+      </sec>
+    </sec>
+  </body>
+  <back>
+    <ref-list>
+      <ref id="R1"><element-citation><pub-id pub-id-type="pmid">90000004</pub-id></element-citation></ref>
+      <ref id="R2"><element-citation><pub-id pub-id-type="doi">10.9999/x</pub-id></element-citation></ref>
+      <ref id="R3"><mixed-citation><pub-id pub-id-type="pmid">90000004</pub-id></mixed-citation></ref>
+      <ref id="R4"><mixed-citation><pub-id pub-id-type="pmid">90000005</pub-id></mixed-citation></ref>
+    </ref-list>
+  </back>
+</article>
